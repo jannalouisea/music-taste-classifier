@@ -5,11 +5,12 @@ def main():
 
 
     dp = DataProcessing()
-    tracks = dp.get_playlist_tracks("janna", "spotify:playlist:1Ol1AQX5IDgBKjEqVflQ0y")
+    dp.authenticate("antoine")
+    tracks = dp.get_playlist_tracks("spotify:playlist:7evicL9iF5Iaa0Unm22N30")
     tracks_2 = dp.get_track_features(tracks)
 
    # print(tracks)
-    print(len(tracks))
+   # print(len(tracks))
 
 
 
