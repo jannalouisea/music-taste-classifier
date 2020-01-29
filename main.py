@@ -5,12 +5,12 @@ def main():
 
 
     dp = DataProcessing()
-    dp.authenticate("antoine")
-    tracks = dp.get_playlist_tracks("spotify:playlist:7evicL9iF5Iaa0Unm22N30")
-    tracks_2 = dp.get_track_features(tracks)
+    dp.authenticate('janna')
 
-   # print(tracks)
-   # print(len(tracks))
+    pid_liked = 'spotify:playlist:1Ol1AQX5IDgBKjEqVflQ0y'
+    pid_disliked = 'spotify:playlist:1skUtkQW7tB9v9nsOJbw84'
+
+    training_df = dp.create_training_dataset(pid_liked, pid_disliked)
 
 
 
