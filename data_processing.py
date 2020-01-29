@@ -16,7 +16,6 @@ class DataProcessing:
         self.test_dataset = None
 
 
-
     def authenticate(self, user):
         """
         :param user: name of user to authenticate
@@ -84,38 +83,37 @@ class DataProcessing:
         return final
 
 
-    def create_training_dataset(self, pid_liked, pid_disliked):
+    def create_dataset(self, pid_liked, pid_disliked, type):
         """
         :param pid_liked: pid of tracks liked
         :param pid_disliked: pid of tracks disliked
-        :return: concatenated df with 'liked' column
         """
 
         liked_tracks = self.get_playlist_tracks(pid_liked)
         liked_df = self.get_track_features(liked_tracks)
+        liked_df['like'] = 1
 
      #   print("The number of liked songs is " + str(len(liked_df)))
 
         disliked_tracks = self.get_playlist_tracks(pid_disliked)
         disliked_df = self.get_track_features(disliked_tracks)
+        disliked_df['like'] = 0
 
     #   print("The number of disliked songs is " + str(len(disliked_df)))
 
-        for i in range(len(liked_df)):
-            liked_df['like'] = 1
+        final = liked_df.append(disliked_df)
+        final.reset_index(inplace=True, drop=True)
 
-        for i in range(len(disliked_df)):
-            disliked_df['like'] = 0
+        if type=='training':
+            self.training_df = final
 
-        self.training_df = liked_df.append(disliked_df)
-        self.training_df.reset_index(inplace=True, drop=True)
+        elif type=='test':
+            self.test_dataset = final
 
-#        print("The number of total songs is " + str(len(self.training_df)))
+        else:
+            print("ERROR: Invalid dataset type.")
 
-        return self.training_df
-
-
-
+        return final
 
 
 
@@ -124,8 +122,6 @@ class DataProcessing:
 
 
 
-        # calls get playlist tracks + get track features
-        # returns final dataframe of all songs liked and disliked
 
 
 
