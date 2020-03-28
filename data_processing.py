@@ -1,6 +1,12 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
 
 
 class DataProcessing:
@@ -11,9 +17,19 @@ class DataProcessing:
         self.ccm = None
         self.spot = None
 
+        self.df = None
+        self.df_X = None
+        self.df_y = None
 
         self.training_dataset = None
+        self.training_X = None
+        self.training_y = None
+
         self.test_dataset = None
+        self.test_X = None
+        self.test_y = None
+
+        self.training_pca = None
 
 
     def authenticate(self, user):
@@ -26,10 +42,13 @@ class DataProcessing:
         elif user == 'antoine':
             self.cid = "588db28e1d014217844cf33a69c42e69"
             self.secret = "f3ae15c85e1b47ccaecdeb0e33dfccaa"
+        else:
+            print("ERROR: invalid user.")
 
         self.ccm = SpotifyClientCredentials(client_id=self.cid, client_secret=self.secret)
         self.spot = spotipy.Spotify(client_credentials_manager=self.ccm)                            # Uses user info to authenticates requests
         self.spot.trace = False
+
 
 
     def get_playlist_tracks(self, pid):
@@ -61,7 +80,6 @@ class DataProcessing:
         if len(ids) < 100:
             audio_features = self.spot.audio_features(ids)
             final = pd.DataFrame(audio_features).drop(['type', 'id', 'uri', 'track_href', 'analysis_url'], axis=1)
-
         else:
             i = len(ids)
             final = pd.DataFrame()
@@ -83,7 +101,7 @@ class DataProcessing:
         return final
 
 
-    def create_dataset(self, pid_liked, pid_disliked, type):
+    def create_datasets(self, pid_liked, pid_disliked):
         """
         :param pid_liked: pid of tracks liked
         :param pid_disliked: pid of tracks disliked
@@ -103,21 +121,80 @@ class DataProcessing:
 
         final = liked_df.append(disliked_df)
         final.reset_index(inplace=True, drop=True)
+        self.df = final
+        self.df_X = final.loc[:, final.columns != 'like']
+        self.df_y = final['like']
 
-        if type=='training':
-            self.training_df = final
-
-        elif type=='test':
-            self.test_dataset = final
-
-        else:
-            print("ERROR: Invalid dataset type.")
-
-        return final
-
+        self.training_X, self.test_X, self.training_y, self.test_y = train_test_split(self.df.loc[:, self.df.columns!='like'],
+                                                                                      self.df.like,
+                                                                                      test_size=0.2)
+        """
+        print(self.training_X)
+        print(self.training_y)
+        print(self.test_X)
+        print(self.test_y)
+        """
 
 
+    def pca(self):
+        """
+        runs PCA on a given dataset
 
+        :return:
+        """
+        training_X = self.training_X.values
+
+        training_X = StandardScaler().fit_transform(training_X) # First must standardize the data bc PCA is affected by scale
+                                                                #   --> Do this using sklearn's StandardScaler
+                                                                #   --> Uses unit scale (mean = 0, variance = 1)
+        pca = PCA(n_components=2)
+        pca_components = pca.fit_transform(training_X)
+        pca_df = pd.DataFrame(data=pca_components, columns=['pc1', 'pc2'])
+
+        pca_df = pd.concat([pca_df, self.training_y], axis=1)
+        self.training_pca = pca_df
+
+        print("The resulting dimensionality-reduced df is the following: \n")
+        print(pca_df.to_string())
+
+        print("The amount of variance explained by each of the principal components is as follows: \n")
+        print(pca.explained_variance_ratio_)
+
+        print("To visualize: \n")
+        plt.scatter(pca_df.iloc[:, 0], pca_df.iloc[:, 1],
+                    c=pca_df.like, edgecolor='none', alpha=0.5)
+        plt.xlabel('Component 1')
+        plt.ylabel('Component 2')
+        plt.colorbar();
+        plt.show()
+
+        plt.plot(np.cumsum(pca.explained_variance_ratio_))
+        plt.xlabel('number of components')
+        plt.ylabel('cumulative explained variance')
+        plt.show()
+
+        return pca_df
+
+
+
+
+    def svd_dim_reduction(self, df):
+        """
+        runs SVD dim reduction on given dataset
+
+        :param df: dataset on which to run SVD
+        :return:
+        """
+
+
+    def regularize(self, df, type):
+        """
+        regularizes input dataset, given choice between l1 and l2
+
+        :param df: dataset to regularize
+        :param type: 'l1' or 'l2'
+        :return:
+        """
 
 
 
@@ -133,5 +210,14 @@ class DataProcessing:
         :return: dataframe with selected audio analysis features of tracks
         """
 
+
+    def get_top_artists(self):
+        """
+        *TO-DO LATER*
+        :return:
+        """
+
+        top_artists = self.spot.current_user_top_tracks(limit=10)
+        print(top_artists)
 
 
