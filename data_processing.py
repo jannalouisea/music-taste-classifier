@@ -71,15 +71,46 @@ class DataProcessing:
         :return: a DataFrame of tracks and their respective audio features
         """
         ids = []
-        other_feats = pd.DataFrame(columns=['popularity', 'explicit'])
+        other_feats = pd.DataFrame(columns=['song_popularity', 'explicit', 'artists', 'genres', 'album_popularity', 'artist_popularity'])
 
         for i in range(len(tracklist)):
-            ids.append(tracklist[i]['track']['id'])
-            other_feats.loc[i] = [tracklist[i]['track']['popularity']] + [tracklist[i]['track']['explicit']]
+            if tracklist[i]['track']['id'] != None:
+                ids.append(tracklist[i]['track']['id'])
+                artists = tracklist[i]['track']['artists']
+                album = tracklist[i]['track']['album']
+
+                names = []
+                genres = []
+                alb_pop = []
+                art_pop = []
+
+                for artist in artists:
+                    art_uri = artist['uri']
+                    alb_uri = album['uri']
+
+                    if art_uri != None and alb_uri != None:
+                        print('The artist uri is ' + str(art_uri))
+                        print('The album uri is ' + str(alb_uri))
+
+                        try:
+                            artist_obj = self.spot.artist(art_uri)
+                            names.append(artist['name'])
+                            genres.append(artist_obj['genres'])
+                            art_pop.append(artist_obj['popularity'])
+                        except:
+                            print("No artist object available.")
+
+                        try:
+                            album_obj = self.spot.album(alb_uri)
+                            alb_pop.append(album_obj['popularity'])
+                        except:
+                            print("No album object available.")
+
+                other_feats.loc[i] = [tracklist[i]['track']['popularity']] + [tracklist[i]['track']['explicit']] + [names] + [genres] + [alb_pop] + [art_pop]
 
         if len(ids) < 100:
             audio_features = self.spot.audio_features(ids)
-            final = pd.DataFrame(audio_features).drop(['type', 'id', 'uri', 'track_href', 'analysis_url'], axis=1)
+            final = pd.DataFrame(audio_features).drop(['type', 'id', 'track_href', 'analysis_url'], axis=1)
         else:
             i = len(ids)
             final = pd.DataFrame()
@@ -95,10 +126,15 @@ class DataProcessing:
             final = final.append(aud)
 
         final.reset_index(inplace=True, drop=True)
-        final = final.drop(['type', 'id', 'uri', 'track_href', 'analysis_url'], axis=1)
         final = pd.concat([final, other_feats], axis=1)
 
         return final
+
+    def create_recommenders_datasets(self, pid):
+        tracks = self.get_playlist_tracks(pid)
+        df = self.get_track_features(tracks)
+
+        df.to_csv('recs_library_2.csv')
 
 
     def create_datasets(self, pid_liked, pid_disliked):
@@ -121,19 +157,21 @@ class DataProcessing:
 
         final = liked_df.append(disliked_df)
         final.reset_index(inplace=True, drop=True)
-        self.df = final
-        self.df_X = final.loc[:, final.columns != 'like']
-        self.df_y = final['like']
+     #   self.df = final
+     #   self.df_X = final.loc[:, final.columns != 'like']
+    #    self.df_y = final['like']
 
-        self.training_X, self.test_X, self.training_y, self.test_y = train_test_split(self.df.loc[:, self.df.columns!='like'],
-                                                                                      self.df.like,
-                                                                                      test_size=0.2)
-        """
-        print(self.training_X)
+        #self.training_X, self.test_X, self.training_y, self.test_y = train_test_split(self.df.loc[:, self.df.columns!='like'],
+      #                                                                                self.df.like,
+       #                                                                               test_size=0.2)
+
+        final.to_csv('music_prefs.csv')
+
+        """print(self.training_X)
         print(self.training_y)
         print(self.test_X)
-        print(self.test_y)
-        """
+        print(self.test_y)"""
+
 
 
     def pca(self):

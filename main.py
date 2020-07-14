@@ -13,18 +13,22 @@ def main():
     dp = DataProcessing()
     dd = DataDescription()
 
-    dp.authenticate('janna')
+    dp.authenticate('antoine')
 
     pid_liked = 'spotify:playlist:1Ol1AQX5IDgBKjEqVflQ0y'
     pid_disliked = 'spotify:playlist:1skUtkQW7tB9v9nsOJbw84'
 
-    dp.create_datasets(pid_liked, pid_disliked)
+    pid_recommenders_library = 'spotify:playlist:1sShkL1XOhll7tPt2tUnif'
+
+  #  dp.create_datasets(pid_liked, pid_disliked)
+    dp.create_recommenders_datasets(pid_recommenders_library)
+
 
     #print(training_df.to_string())
   #  dd.visualize(training_df)
   #  dimen_reduced_training_df = dp.pca()
 
-    try:
+    """try:
         model_choice = int(input('Choose a model: \n'
                                  '0: Logistic Regression\n'
                                  '1: Random Forest\n'
@@ -44,7 +48,7 @@ def main():
 
     predictions = model.generate_predictions(dp.training_X, dp.training_y, dp.test_X)
     model.evaluate(dp.test_y, predictions)
-
+"""
 
 """
 27/03/20
