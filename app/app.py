@@ -3,7 +3,7 @@ import pandas as pd
 import spotipy 
 from spotipy.oauth2 import SpotifyClientCredentials
 import requests
-from generate_playlist import gen_playlist, get_playlist_tracks, get_saved_tracks, get_track_features
+from generate_playlist import gen_playlist
 import time
 
 app = Flask(__name__) # Turn this file into a web app (create app object)
@@ -79,7 +79,7 @@ def go():
 
         #if request.form["sub_but"] == "Generate a playlist from Janna's music!":
 
-        df = pd.read_csv('../datasets/final_rec_df.csv')
+        df = pd.read_csv('final_rec_df.csv')
         df.drop(columns=['Unnamed: 0'])
         final_df = gen_playlist(df, mood, genres, thresh)
 
