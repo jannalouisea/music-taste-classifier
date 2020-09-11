@@ -12,9 +12,9 @@ Could traditional musical measures be used to identify a person's music taste? W
 
 ---- 
 
-For a notebook that outlines my data analysis process, check out `data_analysis.ipynb` [here](https://github.com/jannalouisea/music_taste_predictor/blob/master/data_analysis.ipynb)
+For the Jupyter notebook that outlines my data analysis process, check out `data_analysis.ipynb` [here](https://github.com/jannalouisea/music_taste_predictor/blob/master/data_analysis.ipynb).
 
-For code on how I collected my data, check out `data_processing.py` [here](https://github.com/jannalouisea/music_taste_predictor/blob/master/data_processing.py)
+For code on how I collected my data, check out `data_processing.py` [here](https://github.com/jannalouisea/music_taste_predictor/blob/master/data_processing.py).
 
 ---- 
 
