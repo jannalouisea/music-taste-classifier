@@ -18,4 +18,4 @@ For code on how I collected my data, check out `data_processing.py` [here](https
 
 ---- 
 
-This is the data analysis part of the [Discover Friendly](https://github.com/jannalouisea/discover-friendly-app) App I created. 
+This repository contains the data analysis part of the [Discover Friendly](https://github.com/jannalouisea/discover-friendly-app) App I created, which generates Spotify playlists tailored to a friend's music taste. Check out the app [here](https://discover-friendly.herokuapp.com/)! 
